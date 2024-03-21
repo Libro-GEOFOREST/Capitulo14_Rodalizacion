@@ -6,11 +6,11 @@ En el presente ejemplo se va a partir de la modelización del área basimétrica
 
 ```r
 #Cargar la librería con la que se van a trabajar los datos raster
-library(raster)
-N<-raster("G:/Descarga/N.tif") #Adaptar a la ruta en la que se haya hecho la descarga
-G<-raster("G:/Descarga/G.tif") #Adaptar a la ruta en la que se haya hecho la descarga
-H<-raster("G:/Descarga/H.tif") #Adaptar a la ruta en la que se haya hecho la descarga
-ori<-raster("G:/Descarga/orientaciones.tif") #Adaptar a la ruta en la que se haya hecho la descarga
+library(terra)
+N<-rast("G:/Descarga/N.tif") #Adaptar a la ruta en la que se haya hecho la descarga
+G<-rast("G:/Descarga/G.tif") #Adaptar a la ruta en la que se haya hecho la descarga
+H<-rast("G:/Descarga/H.tif") #Adaptar a la ruta en la que se haya hecho la descarga
+ori<-rast("G:/Descarga/orientaciones.tif") #Adaptar a la ruta en la que se haya hecho la descarga
 
 #Visualizar las capas raster
 plot(N)
@@ -18,21 +18,33 @@ plot(G)
 plot(H)
 plot(ori)
 
-#Rango de valores de cada raster
-range(N)
-range(G)
-range(H)
-range(ori)
+#Rango de valores de cada raster sin tener en cuenta los valores nulos (na.rm=TRUE)
+range(values(N),na.rm=TRUE)
+range(values(G),na.rm=TRUE)
+range(values(H),na.rm=TRUE)
+range(values(ori),na.rm=TRUE)
 ```
 
 Cuando se realiza un proceso de segmentación, se debe tener en cuenta que los algoritmos utilizarán los niveles digitales de los que están compuestos los píxeles de cada una de las capas raster. Ésto significa que tendrá mucho más peso la capa cuyo rango de valores sea mayor, en este caso la densidad, descrita en número de pies por hectárea y casi no quedará reflejada en la segmentación las orientaciones, puesto que sólo toma valores entre 1 y 4.
 
 ```r
-#Reescalado
+#Función de reescalado
 reescalado = function(r){
-  # get the min max values
+  # obtener los valores máximos mínimos de la capa
   minmax_r = range(values(r), na.rm=TRUE) 
-  # rescale 
+  # rescalar 
   return( (r-minmax_r[1]) / (diff(minmax_r)))
 }
+
+#Aplicación de la función de reescalado
+N_r<-reescalado(N)
+G_r<-reescalado(G)
+H_r<-reescalado(H)
+ori_r<-reescalado(ori)
+```
+
+Una vez reescalados, se unen en un mismo raster con tantas bandas como capas utilizadas y se guarda para su utilización durante el proceso de segmentación.
+```r
+#Función de reescalado
+s <- stack(N_r, G_r, H_r,ori_r)
 ```
