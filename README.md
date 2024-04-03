@@ -256,9 +256,13 @@ Ahora se puede comparar visualmente con el generado previamente.
 
 Para una comparación analítica de ambas segmentaciones de forma que se pueda extraer una conclusión objetiva sobre cuál es la más adecuada a la masa forestal estudiada, es recomendable valorar la homogeneidad interna y la heterogeneidad externa de la segmentación. Se puede realizar a partir de diversas técnicas. Aquí se emplea la varianza ponderada por la superficie para estimar la bondad de la segmentación intra-segmento.
 
-$$  \omega Var=\frac{\sum_{i=1}^{n}  a_{i}* v_{i}}{\sum_{i=1}^{n}  a_{i}} $$
+$$  \omega Var=\frac{\sum_{}^{}  a_{i}* v_{i}}{\sum_{}^{}  a_{i}} $$
 
 Donde $ v_{i} $ es la varianza del segmento *i* y  $ a_{i} $ la superficie del segmento *i*
 
 Y, por otro lado, el índice de Moran, que mide la autocorrelación espacial de datos con información espacial, se puede utilizar para medir lo diferentes que son los segmentos unos de otros dentro de cada segmentación.
+
+![](./Auxiliares/MI.png | width=100)
+
+Donde *n* es el numero total de segmentos, $ w_{ij} $ es una medida de la proximidad espacial, $ y_{i} $ es el valor espectral medio de la región *i*  region i, and is the mean spectral value of the image. Each weighted is a measure of the spatial adjacent regions.
 
