@@ -258,13 +258,13 @@ Para una comparación analítica de ambas segmentaciones de forma que se pueda e
 
 $$  \omega Var=\frac{\sum_{}^{}  a_{i}* v_{i}}{\sum_{}^{}  a_{i}} $$
 
-Donde $ v_{i} $ es la varianza del segmento *i* y  $ a_{i} $ la superficie del segmento *i*
+Donde $v_{i}$ es la varianza del segmento *i* y  $a_{i}$ la superficie del segmento *i*
 
 Y, por otro lado, el índice de Moran, que mide la autocorrelación espacial de datos con información espacial, se puede utilizar para medir lo diferentes que son los segmentos unos de otros dentro de cada segmentación.
 
- MI=\frac{n\sum_{}^{}w_{ij}·(y_{i}-\overline{y})·(y_{j}-\overline{y})}{\sum(y_{i}-\overline{y})^2(\sum [\sum w_{ji}])}
+$$ MI=\frac{n\sum_{}^{}w_{ij}·(y_{i}-\overline{y})·(y_{j}-\overline{y})}{\sum(y_{i}-\overline{y})^2(\sum [\sum w_{ji}])} $$
 
-Donde *n* es el numero total de segmentos, $ w_{ij} $ es una medida de la proximidad espacial, $ y_{i} $ es el valor espectral medio de la región *i*, $ \overline y $ es el valor espectral medio de la imagen. Cada peso $ w_{ij} $ es una medida de la regiones espaciales adyacentes.
+Donde *n* es el numero total de segmentos, $w_{ij}$ es una medida de la proximidad espacial, $y_{i}$ es el valor espectral medio de la región *i*, $\overline{y}$ es el valor espectral medio de la imagen. Cada peso $w_{ij}$ es una medida de la regiones espaciales adyacentes.
 
 Ésto mismo implementado en R, quedaría así:
 
