@@ -102,20 +102,56 @@ Antes de realizar la segmentación en sí, es conveniente comprender los paráme
 
 ![](./Auxiliares/Mean_Shift.png)
 
+Para comprender mejor la segmentación Mean-Shift dentro del ámbito forestal es recomendable leer el artículo [Forest Stand Delineation Using a Hybrid Segmentation Approach Based on Airborne Laser Scanning Data ](https://link.springer.com/chapter/10.1007/978-3-642-38886-6_10) que Zhengzhe Wu y sus colaboradores publicaron en la 18 conferencia escandinava sobre análisis de imágenes en 2013.
+
+En la aplicación de la función de segmentación, existen cuatro parámetros principales: tres para el algoritmo de Mean-Shift (rango espectral, rango espacial y tamaño mínimo de la región) y uno para el control de la expansión de características (número máximo de iteraciones. Lo habitual es establecer unos valores lógicos para los primeros teniendo en cuenta que se tratan de masas forestales con unas características concretas y estudiando los histogramas de las imágenes empleadas. Luego, basándose en estas conclusiones, se elige un rango de parámetros para generar resultados optimizados y se comparan con los restantes.
+
 ```r
-#https://link.springer.com/chapter/10.1007/978-3-642-38886-6_10
+#Visualización del histograma de las imágenes reescaladas.
+par(mfrow=c(2,2))
+hist(s,layer=1,breaks=50)
+hist(s,layer=2,breaks=50)
+hist(s,layer=3,breaks=50)
+hist(s,layer=4,breaks=50)
+```
 
+![](./Auxiliares/histograma.png)
+
+Con estos resultados, se puede pensar que un rango espectral razonable entre 0.01 y 0.05 agruparía los rodales semejantes. Por otro lado, sabiendo que la resolución de la imagen es de píxeles del tamaño de 19 m de lado, un rango espacial de búsqueda de segmentos similares de entre 3 y 6 píxeles contiguos podría dar buenos resultados. 
+
+```r
+#Tamaño de pixel de la imagen s
+res(s)
+```
+
+```r annotate
+[1] 19 19
+```
+
+Y, finalmente, para conseguir un segmento de una hectárea, serían necesarios unos 30 píxeles.
+
+$$ 10000/(19*19) $$
+
+
+```r
+#Activación de la librería SegOptim
 library(SegOptim)
-out_segm_obj <- segmentation_OTB_LSMS(
-  inputRstPath  = imagen.path, 
-  SpectralRange = 0.05, 
-  SpatialRange  = 5, 
-  MinSize       = 30,
-  lsms_maxiter  = 50,
-  outputSegmRst = "./segmRaster.tif",
-  verbose       = TRUE,
-  otbBinPath    = otb_path)
 
+#Aplicación de la segmentación Mean-Shift a través de Orfeo
+out_segm_obj <- segmentation_OTB_LSMS(
+  inputRstPath  = imagen.path,               #Ruta en la que se encuentra la imagen a segmentar
+  SpectralRange = 0.05,                      #Rango espectral
+  SpatialRange  = 5,                         #Rango espacial
+  MinSize       = 30,                        #Tamaño mínimo del segmento
+  lsms_maxiter  = 50,                        #Número máximo de iteraciones
+  outputSegmRst = "./segmRaster.tif",        #Imagen raster resultante
+  verbose       = TRUE,                      #Muestra en pantalla la evolución del algoritmo
+  otbBinPath    = otb_path)                  #Ruta en la que se encuentra el programa Orfeo Toolbox
+```
+
+Una vez finalizado el proceso será necesario transformar el raster resultante a un shapefile poligonal y valorar 
+
+```r
 # Load the segmented raster and plot it
 library(terra)
 segm_rst <- rast(out_segm_obj$segm)
