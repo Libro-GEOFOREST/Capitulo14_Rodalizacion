@@ -130,8 +130,9 @@ res(s)
 
 Y, finalmente, para conseguir un segmento de una hectárea, serían necesarios unos 30 píxeles.
 
-$$ 10000/(19*19) $$
+$$ 10000/(19·19)=27,7 píxeles $$
 
+Se puede hacer una primera prueba para establecer si resultan lógicos los parámetros deducidos para la masa en la que se esté trabajando.
 
 ```r
 #Activación de la librería SegOptim
@@ -152,15 +153,21 @@ out_segm_obj <- segmentation_OTB_LSMS(
 Una vez finalizado el proceso será necesario transformar el raster resultante a un shapefile poligonal y valorar 
 
 ```r
-# Load the segmented raster and plot it
+# Cargar el raster de segmentos y visualizarlo
 library(terra)
 segm_rst <- rast(out_segm_obj$segm)
 plot(segm_rst)
+```
 
+![](./Auxiliares/raster_segmentos.png)
+
+Y se procede a convertirlo en shapefile.
+
+```r
+#Transformación del raster a shapefile
 segm_sf<- as.polygons(segm_rst)
 segm_sf<-segm_sf
 
-# library(sf)
-# segm_sf<-st_as_sf(segm_sf)
+#Visualización del shapefile
 plot(segm_sf)
 ```
