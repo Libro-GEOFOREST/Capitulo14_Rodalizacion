@@ -166,8 +166,99 @@ Y se procede a convertirlo en shapefile.
 ```r
 #Transformación del raster a shapefile
 segm_sf<- as.polygons(segm_rst)
-segm_sf<-segm_sf
 
 #Visualización del shapefile
-plot(segm_sf)
+library(mapview)
+mapview(segm_sf,map.types="Esri.WorldImagery",color = 'cyan',legend =FALSE,
+        alpha.regions = 0)
 ```
+
+![](./Auxiliares/shape_segmentos.png)
+
+Ahora se puede valorar subjetivamente lo adecuada que es la segmentación realizada para rodalizar la zona de estudio.
+
+Otra forma para valorar la segmentación, más objetiva, es a través del análisis de las superficies que ocupan cada una de las partes que lo componen y su variabilidad.
+
+```r
+#Cálculo de la superficie de cada segmento
+segm_sf$area<-expanse(segm_sf,unit="m")
+
+#Tamaño medio de los segmentos en hectáreas
+mean(segm_sf$area)/10000
+```
+
+```r annotate
+[1] 2.932969
+```
+
+```r
+#Tamaño máximo de los segmentos en hectáreas
+max(segm_sf$area)/10000
+```
+
+```r annotate
+[1] 27.20416
+```
+
+```r
+#Tamaño minimo de los segmentos en hectáreas
+min(segm_sf$area)/10000
+```
+
+```r annotate
+[1] 1.08383
+```
+
+```r
+#Número de segmentos que componen la segmentación
+length(segm_sf$area)
+```
+
+```r annotate
+[1] 551
+```
+
+Dados los resultados del tamaño medio de los segmentos y su distribución, quizás se podría pensar en aumentar los rangos espacial y espectral para que los segmentos incrementen su tamaño.
+
+```r
+#Aplicación de la segmentación Mean-Shift a través de Orfeo
+out_segm_obj <- segmentation_OTB_LSMS(
+  inputRstPath  = imagen.path,               #Ruta en la que se encuentra la imagen a segmentar
+  SpectralRange = 0.1,                       #Rango espectral
+  SpatialRange  = 10,                        #Rango espacial
+  MinSize       = 30,                        #Tamaño mínimo del segmento
+  lsms_maxiter  = 50,                        #Número máximo de iteraciones
+  outputSegmRst = "./segmRaster.tif",        #Imagen raster resultante
+  verbose       = TRUE,                      #Muestra en pantalla la evolución del algoritmo
+  otbBinPath    = otb_path)                  #Ruta en la que se encuentra el programa Orfeo Toolbox
+
+# Cargar el raster de segmentos y visualizarlo
+segm_rst2 <- rast(out_segm_obj$segm)
+plot(segm_rst2)
+```
+
+![](./Auxiliares/raster_segmentos2.png)
+
+Y se repite la operación anterior para transformalo en shapefile
+
+```r
+#Transformación del raster a shapefile
+segm_sf2<- as.polygons(segm_rst2)
+
+#Visualización del shapefile
+mapview(segm_sf2,map.types="Esri.WorldImagery",color = 'red',legend =FALSE,
+        alpha.regions = 0)
+```
+
+![](./Auxiliares/shape_segmentos2.png)
+
+Ahora se puede comparar visualmente con el generado previamente.
+
+Para una comparación analítica de ambas segmentaciones de forma que se pueda extraer una conclusión objetiva sobre cuál es la más adecuada a la masa forestal estudiada, es recomendable valorar la homogeneidad interna y la heterogeneidad externa de la segmentación. Se puede realizar a partir de diversas técnicas. Aquí se emplea la varianza ponderada por la superficie para estimar la bondad de la segmentación intra-segmento.
+
+$$  \omega Var=\frac{\sum_{i=1}^{n}  a_{i}* v_{i}}{\sum_{i=1}^{n}  a_{i}} $$
+
+Donde $ v_{i} $ es la varianza del segmento *i* y  $ a_{i} $ la superficie del segmento *i*
+
+Y, por otro lado, el índice de Moran, que mide la autocorrelación espacial de datos con información espacial, se puede utilizar para medir lo diferentes que son los segmentos unos de otros dentro de cada segmentación.
+
