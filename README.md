@@ -262,7 +262,183 @@ Donde $ v_{i} $ es la varianza del segmento *i* y  $ a_{i} $ la superficie del s
 
 Y, por otro lado, el índice de Moran, que mide la autocorrelación espacial de datos con información espacial, se puede utilizar para medir lo diferentes que son los segmentos unos de otros dentro de cada segmentación.
 
-![](./Auxiliares/MI.png | width=100)
+ MI=\frac{n\sum_{}^{}w_{ij}·(y_{i}-\overline{y})·(y_{j}-\overline{y})}{\sum(y_{i}-\overline{y})^2(\sum [\sum w_{ji}])}
 
-Donde *n* es el numero total de segmentos, $ w_{ij} $ es una medida de la proximidad espacial, $ y_{i} $ es el valor espectral medio de la región *i*  region i, and is the mean spectral value of the image. Each weighted is a measure of the spatial adjacent regions.
+Donde *n* es el numero total de segmentos, $ w_{ij} $ es una medida de la proximidad espacial, $ y_{i} $ es el valor espectral medio de la región *i*, $ \overline y $ es el valor espectral medio de la imagen. Cada peso $ w_{ij} $ es una medida de la regiones espaciales adyacentes.
 
+Ésto mismo implementado en R, quedaría así:
+
+```r
+#Para la primera segmentacion
+medias<-zonal(s,segm_rst,fun="mean")      #Calculo de los valores medios en los segmentos para las imágenes de densidad, altura dominante, área basimétrica y orientaciones reescaladas
+desviaciones<-zonal(s,segm_rst,fun="sd")  #Calculo de las desviaciones estándar en los segmentos para las imágenes de densidad, altura dominante, área basimétrica y orientaciones reescaladas
+
+#Varianza
+varianzas<-(desviaciones^2)
+varianzas<-as.data.frame(varianzas)
+
+#Homogeneidad interna
+homo.int.N<-sum(segm_sf$area*varianzas$N)/sum(segm_sf$area)
+homo.int.G<-sum(segm_sf$area*varianzas$G)/sum(segm_sf$area)
+homo.int.H<-sum(segm_sf$area*varianzas$H,na.rm=TRUE)/sum(segm_sf$area)
+homo.int.ori<-sum(segm_sf$area*varianzas$orientaciones,na.rm=TRUE)/sum(segm_sf$area)
+
+homo.int.N;homo.int.G;homo.int.H;homo.int.ori
+```
+
+```r annotate
+[1] 0.03497933
+[1] 0.01015894
+[1] 0.01426646
+[1] 0.0377141
+```
+
+```r 
+#Heterogeniedad externa
+library(spdep)
+library(sf)
+#Definir los poligonos vecinos
+nb <- poly2nb(st_as_sf(segm_sf), queen=TRUE)
+nb[1] #Imprimirá en pantalla los polígonos vecinos al primero
+```
+
+```r annotate
+[[1]]
+[1] 468 507
+```
+
+```r
+#Asignar pesos a los vecinos
+lw <- nb2listw(nb, style="W", zero.policy=TRUE)
+lw$weights[1] Imprimirá en pantalla los pesos asignados a cada vecino del primer polígono
+```
+
+```r annotate
+[[1]]
+[1] 0.5 0.5
+```
+
+```r
+#Cálculo del estadístico del índice de Moran
+hete.ext.N<- moran(medias$N, lw, length(nb), Szero(lw),NAOK = TRUE)[1]
+hete.ext.G<- moran(medias$G, lw, length(nb), Szero(lw),NAOK = TRUE)[1]
+hete.ext.H<- moran(medias$H, lw, length(nb), Szero(lw),NAOK = TRUE)[1]
+hete.ext.ori<- moran(medias$orientaciones, lw, length(nb), Szero(lw),NAOK = TRUE)[1]
+
+hete.ext.N;hete.ext.G;hete.ext.H;hete.ext.ori
+```
+
+```r annotate
+$I
+[1] 0.4437964
+
+$I
+[1] 0.4921384
+
+$I
+[1] 0.6455489
+
+$I
+[1] 0.3379061
+```
+
+```r 
+#Para la segunda segmentacion
+#Cálculo de superficies
+segm_sf2$area<-expanse(segm_sf2,unit="m")
+medias2<-zonal(s,segm_rst2,fun="mean")      #Calculo de los valores medios en los segmentos para las imágenes de densidad, altura dominante, área basimétrica y orientaciones reescaladas
+desviaciones2<-zonal(s,segm_rst2,fun="sd")  #Calculo de las desviaciones estándar en los segmentos para las imágenes de densidad, altura dominante, área basimétrica y orientaciones reescaladas
+
+#Varianza
+varianzas2<-(desviaciones2^2)
+varianzas2<-as.data.frame(varianzas2)
+
+#Homogeneidad interna
+homo.int.N2<-sum(segm_sf2$area*varianzas2$N)/sum(segm_sf2$area)
+homo.int.G2<-sum(segm_sf2$area*varianzas2$G)/sum(segm_sf2$area)
+homo.int.H2<-sum(segm_sf2$area*varianzas2$H,na.rm=TRUE)/sum(segm_sf2$area)
+homo.int.ori2<-sum(segm_sf2$area*varianzas2$orientaciones,na.rm=TRUE)/sum(segm_sf2$area)
+
+homo.int.N2;homo.int.G2;homo.int.H2;homo.int.ori2
+```
+
+```r annotate
+[1] 0.03411438
+[1] 0.01010498
+[1] 0.01365106
+[1] 0.03402862
+```
+
+```r 
+#Heterogeniedad externa
+library(spdep)
+library(sf)
+#Definir los poligonos vecinos
+nb2 <- poly2nb(st_as_sf(segm_sf2), queen=TRUE)
+nb2[1]
+
+#Asignar pesos a los vecinos
+lw2 <- nb2listw(nb2, style="W", zero.policy=TRUE)
+lw2$weights[1]
+
+#Cálculo del estadístico del índice de Moran
+hete.ext.N2<- moran(medias2$N, lw2, length(nb2), Szero(lw2),NAOK = TRUE)[1]
+hete.ext.G2<- moran(medias2$G, lw2, length(nb2), Szero(lw2),NAOK = TRUE)[1]
+hete.ext.H2<- moran(medias2$H, lw2, length(nb2), Szero(lw2),NAOK = TRUE)[1]
+hete.ext.ori2<- moran(medias2$orientaciones, lw2, length(nb2), Szero(lw2),NAOK = TRUE)[1]
+
+hete.ext.N2;hete.ext.G2;hete.ext.H2;hete.ext.ori2
+```
+
+```r annotate
+$I
+[1] 0.388659
+
+$I
+[1] 0.4509606
+
+$I
+[1] 0.5831269
+
+$I
+[1] 0.1905525
+```
+Y ahora se pueden comparar los valores medios de homogeneidad interna y heterogeneidad externa para ambas segmentaciones de forma que se pueda tomar una decisión
+
+```r
+#Valor medio de homogeneidad interna de la primera segmentación
+mean(homo.int.N[[1]],homo.int.N[[1]],homo.int.N[[1]],homo.int.N[[1]])
+```
+
+```r annotate
+[1] 0.03497933
+```
+
+```r
+#Valor medio de homogeneidad interna de la segunda segmentación
+mean(homo.int.N2[[1]],homo.int.N2[[1]],homo.int.N2[[1]],homo.int.N2[[1]])
+```
+
+```r annotate
+[1] 0.03411438
+```
+
+```r
+#Valor medio de heterogeneidad externa de la primera segmentación
+mean(hete.ext.N[[1]],hete.ext.G[[1]],hete.ext.H[[1]],hete.ext.ori[[1]])
+```
+
+```r annotate
+[1] 0.4437964
+```
+
+```r
+#Valor medio de heterogeneidad externa de la segunda segmentación
+mean(hete.ext.N2[[1]],hete.ext.G2[[1]],hete.ext.H2[[1]],hete.ext.ori2[[1]])
+```
+
+```r annotate
+[1] 0.388659
+```
+
+Se podría concluir que ante unos valores de homogeneidad interna muy parecidos, la primera segmentación presenta una heterogeneidad entre los distintos segmentos que la componen algo mayor, cosa deseable en una rodalización. En ambos casos, la heterogeneidad externa está más marcada por la altura dominante, seguida por el área basimétrica y en menor medida por las orientaciones. En consecuencia, la selección de la mejor segmentación para la delimitación de masas forestales utilizando la metodología OTB no es tan sencilla como se pensaba anteriormente. Dado que el algoritmo Mean Shift ha demostrado ser un método adecuado para la delimitación de masas forestales, la decisión sobre cuál es la mejor segmentación debe provenir de una concordancia entre las mejores varianzas ponderadas y el mejor índice de Moran, añadiendo el número resultante de segmentos a la decisión, dependiendo de los objetivos de gestión forestal. Para la silvicultura de precisión, los silvicultores pueden requerir una delimitación de rodales muy precisa con respecto a la variación intrarregional con un gran número de segmentos, a pesar de la similitud de los segmentos entre sí. Sin embargo, en los pinares mediterráneos, donde la protección y la gestión del agua son los principales objetivos silvícolas, se exigiría una delimitación del rodal menos precisa, incluyendo áreas más grandes de alta heterogeneidad interregional, con, en consecuencia, un bajo número de segmentos.
