@@ -46,7 +46,7 @@ ori_r<-reescalado(ori)
 
 Una vez reescalados, se unen en un mismo raster con tantas bandas como capas utilizadas y se guarda para su utilización durante el proceso de segmentación.
 ```r
-#Función de reescalado
+#Crear raster multibanda
 s <- stack(N_r, G_r, H_r,ori_r)
 
 #Guardar raster
@@ -310,7 +310,7 @@ nb[1] #Imprimirá en pantalla los polígonos vecinos al primero
 ```r
 #Asignar pesos a los vecinos
 lw <- nb2listw(nb, style="W", zero.policy=TRUE)
-lw$weights[1] Imprimirá en pantalla los pesos asignados a cada vecino del primer polígono
+lw$weights[1] #Imprimirá en pantalla los pesos asignados a cada vecino del primer polígono
 ```
 
 ```r annotate
