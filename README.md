@@ -2,7 +2,7 @@
 
 Mª Ángeles Varo Martínez y Rafael Mª Navarro Cerrillo
 
-# Capitulo14_Rodalizacion
+# Capitulo 11: Integración de LiDAR con sensores espectrales: rodalización
 
 La segmentación como medio para obtener una rodalización dasocrática uniforme de la estructura forestal es una técnica especialmente interesante cuando se combinan datos dasocráticos obtenidos a partir de la modelización LiDAR que se vio en el capítulo 13 del presente libro, junto con información espectral (por ejemplo, un índice NDVI de una imagen Landsat podría aportar información del estado fisiológico del arbolado) o mapas de orientaciones para que los rodales resultantes sigan las reglas de la rodalización tradicional basada en líneas permanentes del terreno.
 
